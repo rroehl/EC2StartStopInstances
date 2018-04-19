@@ -97,7 +97,7 @@
       "Description"   :   "Author's name.",
       "Type"          :   "String",
       "Default" : "Your name here",
-      "ConstraintDescription" : "What is the author's name?"
+      "ConstraintDescription" : "What is your name?"
     }
   },
 

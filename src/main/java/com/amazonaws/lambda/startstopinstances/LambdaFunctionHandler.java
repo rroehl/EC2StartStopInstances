@@ -214,7 +214,7 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 			}
 			else
 			{
-				//Missing input data
+				//Missing input data needs to be corrected 
 				context.getLogger().log("Missing Input Data: -Instance ID: " + request.instance +" -Region: " + request.region + " -Action: " +request.action + " \n");
 			}
 		}
