@@ -24,7 +24,7 @@
       ],
       "ParameterLabels" :
       {
-        "LambdaStackNameParameter": { "default": "What is the name of the stack used to create stop/start lambda function?"},
+        "LambdaStackNameParameter": { "default": "What is the name of the stack used to create stop/start Lambda function?"},
         "ScheduleEC2EventName": { "default": "What is the name of the schedule event rule name?"},
         "EC2InstanceId" :  { "default": "What is the EC2 instance ID?"},
         "StartorStopAcion" :  { "default": "Do you want to start or stop the EC2 instance?"},
@@ -40,16 +40,16 @@
   {
     "LambdaStackNameParameter" :
     {
-      "Description"   :   "The stack name used to create the lambda function.",
+      "Description"   :   "The stack name which was used to create the start stop Lambda function. It is needed since information is pulled from the Lambda function creation stack.",
       "Type"          :   "String",
-      "Default" : "stack",
+      "Default" : "{Lambda fn stack creation name}",
       "ConstraintDescription" : "The stack name used to create the lambda function."
     },
     "ScheduleEC2EventName" :
     {
       "Description"   :   "The schedule event name (must be unique).",
       "Type"          :   "String",
-      "Default" : "ScheduleEC2Instance",
+      "Default" : "Schedule{Instance ID}To{start of stop}",
       "ConstraintDescription" : "The schedule event name (must be unique)."
     },
     "EC2InstanceId" :
@@ -69,7 +69,7 @@
     },
     "CronExpression" :
     {
-      "Description"   : "(min hrs day-of-mnth mnth day-of-wk)   see doc at https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"  ,
+      "Description"   : "The format is (min hrs day-of-mnth mnth day-of-wk) and the time is in UTC time. Examples: (30 2 * * SAT *) == Friday 7:30 PM PST and  (30 22 * * SUN *) == Sunday 4:30 PM PST. See doc at https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"  ,
       "Type"          :   "String",
       "Default" :         "(41 21 * * ? *)",
       "ConstraintDescription" : "Cron expression rule for the schedule https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"
@@ -77,15 +77,15 @@
     
     "instancestartstopwaittime" :
     {
-      "Description"   : "This is the time between starting and stoping the instance and checking if it is in the correct state. The value is limited by the maximum time of 5 minutes that Lamba function can execute. "  ,
+      "Description"   : "This is the time between starting and stoping the instance and checking if it is in the correct state. The value is limited by the maximum time of 5 minutes (300 sec.) that Lamba function can execute. "  ,
       "Type"          :   "String",
-      "Default" :         "3",
-      "ConstraintDescription" : "This is the time between starting and stoping the instance and checking if it is in the correct state."
+      "Default" :         "180",
+      "ConstraintDescription" : "This is the time between starting or stoping the instance and checking if it is in the correct state."
     },
     
     "snstopicarn" :
     {
-      "Description"   : "The SNS topic ARN is used by the Lambda function to send a notification if after the wait prtiod the instance state is not in the desired stop or start state."  ,
+      "Description"   : "The SNS topic ARN is used by the Lambda function to send a notification if after the wait period the instance state is not in the desired stop or start state."  ,
       "Type"          :   "String",
       "Default" :         "arn:aws:sns:{enter the region}:{enter the account ID}:{enter the topic name}",
       "ConstraintDescription" : "The SNS topic ARN is used by the Lambda function to send a notification if after the wait prtiod the instance state is not in the desired stop or start state."
@@ -119,13 +119,13 @@
             [
               "",
               [
-                "{ \"regionkey\": \"",
+                "{ \"region\": \"",
                 { "Ref" : "AWS::Region"},
                           
-                "\",   \"instancekey\": \"",
+                "\",   \"instance\": \"",
                 {"Ref" : "EC2InstanceId"},
                 
-                "\",   \"actionkey\": \"",
+                "\",   \"action\": \"",
                 {"Ref" : "StartorStopAcion"},
                 
                 "\",   \"timewaitseconds\": \"",

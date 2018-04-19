@@ -214,7 +214,8 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 			}
 			else
 			{
-				context.getLogger().log("Missing Input Data: " + request.region + " " + this.instance_id + " " + this.action + "\n");	
+				//Missing input data
+				context.getLogger().log("Missing Input Data: -Instance ID: " + request.instance +" -Region: " + request.region + " -Action: " +request.action + " \n");
 			}
 		}
 	   catch (AmazonServiceException ase) 

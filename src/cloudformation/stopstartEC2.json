@@ -40,10 +40,10 @@
   {
     "StartStopRoleName" :
     {
-      "Description"   :   "The tob created IAM role allows Lamda fn to start and stop instances. It will be created.",
+      "Description"   :   "The Cloudformation created IAM inline role allows Lamda fn to start and stop instances and send notifications to SNS. It will be created.",
       "Type"          :   "String",
       "Default" : "lambda_start_stop_ec2",
-      "ConstraintDescription" : "The tob created IAM role allows Lamda fn to start and stop instances. It will be created."
+      "ConstraintDescription" : "The job created IAM role allows Lamda fn to start and stop instances. It will be created."
     },
     "LambdaFunctionName" :
     {
@@ -54,7 +54,7 @@
     },
     "LambdaTimeout" :
     {
-      "Description"   :   "The function execution time (in seconds) after which Lambda terminates the function. It has to be greater that the longest instance startup or stopping time.",
+      "Description"   :   "The function execution time (in seconds) after which Lambda terminates the function. It has to be greater that the longest instance startup or stopping time (300 sec. is the max.).",
       "Type": "Number",
       "MinValue": "1",
       "MaxValue": "300",
@@ -63,7 +63,7 @@
     },
     "LambdaMemSize" :
     {
-      "Description"   :   "he amount of memory, in MB, that is allocated to your Lambda function.",
+      "Description"   :   "The amount of memory, in MB, that is allocated to your Lambda function.",
       "Type": "Number",
       "MinValue": "128",
       "MaxValue": "1536",
@@ -79,7 +79,7 @@
     },
     "CodeZipFile" :
     {
-      "Description"   :   "Please ensure that the zip of the Lambda code is on the S3 bucket. Please ensure it is already copied to the S3 bucket",
+      "Description"   :   "Please ensure that the zip of the Lambda code is on the S3 bucket. It has to be manually copied to the S3 bucket",
       "Type"          :   "String",
       "Default" : "EC2StartStopInstanceFn.zip",
       "ConstraintDescription" : "The name of the Zip source code of your Lambda function. Please ensure it is already copied to the S3 bucket."
