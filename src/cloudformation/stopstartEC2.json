@@ -1,0 +1,227 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Metadata":
+  {
+    "AWS::CloudFormation::Interface" :
+    {
+      "ParameterGroups" :
+      [
+        {
+          "Label" : { "default" : "EC2 Start Stop Role and Lambda Function Configuration" },
+          "Parameters" :
+          [
+            "LambdaFunctionName",
+            "LambdaTimeout",
+            "LambdaMemSize",
+            "StartStopRoleName",
+            "CodeS3Bucket",
+            "CodeZipFile",
+            "PolicyInstanceTagValue",
+            "AuthorName"
+          ]
+        }
+      ],
+      "ParameterLabels" :
+      {
+        "LambdaFunctionName" : { "default": "What Lambda function name?"},
+        "LambdaTimeout": {"default": "What is the Lambda function timeout?"},
+        "LambdaMemSize": {"default": "What is the Lambda function memory size?"},
+        "StartStopRoleName": { "default": "What IAM role name that Lambda will use?"},
+        "CodeS3Bucket": {"default" : "What is S3 Bucket code repo name?"},
+        "CodeZipFile": {"default": "What is zip filename?"},
+        "PolicyInstanceTagValue": {"default": "What is Instance tag value for the Lambda function?"},
+        "AuthorName" : {"default": "What is author's name?"}
+      }
+    }
+  },
+
+  "Parameters" :
+  {
+    "StartStopRoleName" :
+    {
+      "Description"   :   "The tob created IAM role allows Lamda fn to start and stop instances. It will be created.",
+      "Type"          :   "String",
+      "Default" : "lambda_start_stop_ec2",
+      "ConstraintDescription" : "The tob created IAM role allows Lamda fn to start and stop instances. It will be created."
+    },
+    "LambdaFunctionName" :
+    {
+      "Description"   :   "The Lambda function name ",
+      "Type"          :   "String",
+      "Default" : "StopStartEC2Instance",
+      "ConstraintDescription" : "The Lambda function name."
+    },
+    "LambdaTimeout" :
+    {
+      "Description"   :   "The function execution time (in seconds) after which Lambda terminates the function. It has to be greater that the longest instance startup or stopping time.",
+      "Type": "Number",
+      "MinValue": "1",
+      "MaxValue": "300",
+      "Default" : "300",
+      "ConstraintDescription" : "The function execution time (in seconds) after which Lambda terminates the function. It has to be greater that the longest instance startup or stopping time."
+    },
+    "LambdaMemSize" :
+    {
+      "Description"   :   "he amount of memory, in MB, that is allocated to your Lambda function.",
+      "Type": "Number",
+      "MinValue": "128",
+      "MaxValue": "1536",
+      "Default" : "256",
+      "ConstraintDescription" : "The amount of memory, in MB, that is allocated to your Lambda function."
+    },
+    "CodeS3Bucket" :
+    {
+      "Description"   :   "The name of the Amazon S3 bucket where the Lambda .zip file that contains your deployment package is stored.",
+      "Type"          :   "String",
+      "Default" : "lambda-code-rhr",
+      "ConstraintDescription" : "The name of the Amazon S3 bucket where the .zip file that contains your deployment package is stored."
+    },
+    "CodeZipFile" :
+    {
+      "Description"   :   "Please ensure that the zip of the Lambda code is on the S3 bucket. Please ensure it is already copied to the S3 bucket",
+      "Type"          :   "String",
+      "Default" : "EC2StartStopInstanceFn.zip",
+      "ConstraintDescription" : "The name of the Zip source code of your Lambda function. Please ensure it is already copied to the S3 bucket."
+    },
+   
+    "PolicyInstanceTagValue":
+    {
+      "Description"   :   "The EC2 instance must have this tag name of \"LambdaStartStopControl\" and value of \"true\" in order that the function can stop and start it.",
+      "Type"          :   "String",
+      "Default" : "true",
+      "ConstraintDescription" : "The EC2 instance must have this tag value in order that the function can stop and start it."
+    },
+    "AuthorName" :
+    {
+      "Description"   :   "Author's name.",
+      "Type"          :   "String",
+      "Default" : "Your name here",
+      "ConstraintDescription" : "What is the author's name?"
+    }
+  },
+
+  "Resources" :
+  {
+  "StopStartLambdaRole" :
+    {
+      "Type": "AWS::IAM::Role",
+      "Properties": 
+      {
+        "AssumeRolePolicyDocument":
+        {
+          "Version": "2012-10-17",
+          "Statement": 
+          [
+            {
+              "Effect": "Allow",
+              "Principal": 
+              {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+
+        "Path": "/",
+        "Policies": 
+        [
+          {
+            "PolicyName": "StopStartEC2InstancePolicy",
+            "PolicyDocument":
+            {
+              "Version": "2012-10-17",
+              "Statement":
+              [ 
+                {
+                  "Effect": "Allow",
+                  "Action":
+                  [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "*"
+                }, 
+                {
+                  "Effect": "Allow",
+                  "Action": ["ec2:StartInstances","ec2:StopInstances"],
+                  "Resource": {"Fn::Join" : ["", ["arn:aws:ec2:",{ "Ref" : "AWS::Region" } ,":",{ "Ref" : "AWS::AccountId" },":instance/*"]]},
+				  "Condition":
+				  {
+                 	"StringEquals": 
+                 	{
+                 		"ec2:ResourceTag/LambdaStartStopControl": {"Ref" : "PolicyInstanceTagValue" }
+					}	
+            		  }  
+                },    
+                {
+                  "Effect": "Allow",
+                  "Action": ["ec2:DescribeInstances" ],
+                  "Resource": "*" 		  
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "sns:Publish",
+                  "Resource": "*"
+                } 
+              ]
+            }
+          }
+        ],
+        "RoleName": {"Ref":  "StartStopRoleName"}
+      }
+    },
+
+    "StopStartEC2Instance" :
+    {
+      "Type" : "AWS::Lambda::Function",
+      "Properties" :
+      {
+        "Code":
+        {
+          "S3Bucket": {"Ref": "CodeS3Bucket"},
+          "S3Key": {"Ref": "CodeZipFile"}
+        },
+
+        "Description" : "Function to stop or start EC2 instances.",
+
+        "FunctionName" : {"Ref": "LambdaFunctionName"},
+        "Handler" : "com.amazonaws.lambda.startstopinstances.LambdaFunctionHandler",
+
+        "MemorySize" : {"Ref" : "LambdaMemSize"},
+
+        "Role" : { "Fn::GetAtt" : [ "StopStartLambdaRole", "Arn"] },
+        "Runtime" : "java8",
+        "Timeout" :  {"Ref" : "LambdaTimeout"},
+
+
+        "Tags" :
+        [
+          {"Key"  : "Name",  "Value"  : {"Ref": "LambdaFunctionName"}},
+          {"Key"  : "Author", "Value"  : {"Ref": "AuthorName"}},
+          {"Key"  : "Region", "Value"  : { "Ref" : "AWS::Region" }}
+        ]
+      }
+    }
+  },
+
+  "Outputs" :
+  {
+    "Region" : { "Description" :  "AWS Region", "Value" :   { "Ref" : "AWS::Region"} },
+    "FunctionNameARN" :
+    {
+      "Description" : "The function name arn",
+      "Value" :  { "Fn::GetAtt" : ["StopStartEC2Instance", "Arn"] },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-LambdaFnARN" }}
+    },
+    "FunctionName" :
+    {
+      "Description" : "The function name",
+      "Value" :  { "Ref": "LambdaFunctionName" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-LambdaFnName" }}
+    }
+
+  }
+}
