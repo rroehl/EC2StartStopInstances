@@ -26,10 +26,10 @@
       {
         "LambdaFunctionName" : { "default": "What Lambda function name?"},
         "LambdaTimeout": {"default": "What is the Lambda function timeout?"},
-        "LambdaMemSize": {"default": "What is the Lambda function memory size?"},
-        "StartStopRoleName": { "default": "What IAM role name that Lambda will use?"},
+        "LambdaMemSize": {"default": "What is the Lambda function memory usage size?"},
+        "StartStopRoleName": { "default": "What IAM role name that will be created amd used by the Lambda function?"},
         "CodeS3Bucket": {"default" : "What is S3 Bucket code repo name?"},
-        "CodeZipFile": {"default": "What is zip filename?"},
+        "CodeZipFile": {"default": "What is Java class zip filename?"},
         "PolicyInstanceTagValue": {"default": "What is Instance tag value for the Lambda function?"},
         "AuthorName" : {"default": "What is author's name?"}
       }
@@ -40,7 +40,7 @@
   {
     "StartStopRoleName" :
     {
-      "Description"   :   "The Cloudformation created IAM inline role allows Lamda fn to start and stop instances and send notifications to SNS. It will be created.",
+      "Description"   :   "The Cloudformation created IAM role allows Lamda fn to start and stop instances and send notifications to SNS. It will be created.",
       "Type"          :   "String",
       "Default" : "lambda_start_stop_ec2",
       "ConstraintDescription" : "The job created IAM role allows Lamda fn to start and stop instances. It will be created."
@@ -79,7 +79,7 @@
     },
     "CodeZipFile" :
     {
-      "Description"   :   "Please ensure that the zip of the Lambda code is on the S3 bucket. It has to be manually copied to the S3 bucket",
+      "Description"   :   "Please ensure that the zip of the Lambda code is on the S3 bucket. It has to be manually copied to the S3 bucket.",
       "Type"          :   "String",
       "Default" : "EC2StartStopInstanceFn.zip",
       "ConstraintDescription" : "The name of the Zip source code of your Lambda function. Please ensure it is already copied to the S3 bucket."

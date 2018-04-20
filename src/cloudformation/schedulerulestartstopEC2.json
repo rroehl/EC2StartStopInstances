@@ -54,7 +54,7 @@
     },
     "EC2InstanceId" :
     {
-      "Description"   :   "The EC2 instance id.",
+      "Description"   :   "The EC2 instance id that the action will be applied to.",
       "Type"          :   "String",
       "Default" :         "i-",
       "ConstraintDescription" : "The EC2 instance id."
@@ -69,7 +69,7 @@
     },
     "CronExpression" :
     {
-      "Description"   : "The format is (min hrs day-of-mnth mnth day-of-wk) and the time is in UTC time. Examples: (30 2 * * SAT *) == Friday 7:30 PM PST and  (30 22 * * SUN *) == Sunday 4:30 PM PST. See doc at https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"  ,
+      "Description"   : "The format is (min hrs day-of-mnth mnth day-of-wk) and the time is in UTC time. Examples: (30 2 ? * SAT *) == Friday 7:30 PM PST and  (30 22 ? * SUN *) == Sunday 4:30 PM PST. See doc at https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"  ,
       "Type"          :   "String",
       "Default" :         "(41 21 * * ? *)",
       "ConstraintDescription" : "Cron expression rule for the schedule https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"
@@ -77,7 +77,7 @@
     
     "instancestartstopwaittime" :
     {
-      "Description"   : "This is the time between starting and stoping the instance and checking if it is in the correct state. The value is limited by the maximum time of 5 minutes (300 sec.) that Lamba function can execute. "  ,
+      "Description"   : "This is the time between starting and stoping the instance and checking if it is in the correct state. The value is limited by the maximum time of 5 minutes (300 sec.) that Lambda function can execute. "  ,
       "Type"          :   "String",
       "Default" :         "180",
       "ConstraintDescription" : "This is the time between starting or stoping the instance and checking if it is in the correct state."
