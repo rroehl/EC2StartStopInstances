@@ -31,7 +31,7 @@ The "stopstartEC2" CloudFormation script will require:
 The "schedulerulestartstopEC2" CloudFromation script will require:
     a.) An SNS topic with an associated email address to receive notifications.
     b.) The "stopstartEC2" CloudFormation script needs to have been executed successfully.
-     c.) An EC2 instance with a tag named "LambdaStartStopControl" set to "true".
+    c.) An EC2 instance with a tag named "LambdaStartStopControl" set to "true".
 
 ### Installing
 
@@ -54,9 +54,9 @@ Next execute  "schedulerulestartstopEC2" CloudFromation script. It will prompt f
       c.)The EC2 instance id - The EC2 instance id that the action will be applied to.
       d.) The start or stop action - Start or stop the EC2 instance.
       e.) The Cron expression for the schedule (UTC only) - The format is (min hrs day-of-mnth mnth day-of-wk) and the time is in UTC time.  See doc at https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html.
-      f.) The time  (sec.) to wait before checking the instance state - This is the time between starting and stopping the instance and checking if it is in the correct state. The value is limited by the maximum time of 5 minutes (300 sec.) that Lambda function can execute. 
+      f.) The time (sec.) to wait before checking the instance state - This is the time between starting and stopping the instance and checking if it is in the correct state. The value is limited by the maximum time of 5 minutes (300 sec.) that Lambda function can execute. 
       g.) SNS notification ARN - The SNS topic ARN is used by the Lambda function to send a notification if after the wait period the instance state is not in the desired stop or start state.
-       h.) Your name.
+      h.) Your name.
 
 ## License
 
@@ -64,6 +64,6 @@ This project is licensed under the Apache License - see the [LICENSE.md](LICENSE
 
 ## Acknowledgments
 
-* There many great sites with information that help build this liitle project. Thanks to all of them.
+* There many great sites with information that help build this little project. Thanks to all of them.
 
 
