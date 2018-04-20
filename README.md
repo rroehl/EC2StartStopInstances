@@ -2,13 +2,13 @@
 
 The product will allow the scheduling of the starting and stopping EC2 instances. The repo contains a Java Lambda function and CloudFormation JSON scripts to configure the Lambda function and schedule the starting and stopping of EC2 instances.
 
-The LambdaFunctionHandler class has five inputted parameters that are passed to it from the AWS scheduled event via the RequestClass:
+The LambdaFunctionHandler class has five inputed parameters that are passed to it from the AWS scheduled event via the RequestClass:
     a.)instance - The instance ID to which the action will be applied ("i-004aa8aetd9736e2e").
     b.)region - The AWS region in which it is installed ("us-east-2").
     c.) action - Either "Stop" or "Start" action applied to the instance.
-    d.) timewaitseconds - The time in seconds between the action being applied to the instance and when theinstance is tested to ensure that action is accomplished ( -- optional).
+    d.) timewaitseconds - The time in seconds between the action being applied to the instance and when the instance is tested to ensure that action is accomplished ( -- optional).
     e.) topicarn - The SNS ARN topic to which the notification is sent in the event the action is not accomplished in the defined period ("arn:aws:sns:us-east-2:638158650817:EmailTopic" -- optional).
-The handleRequest function will will either stop or start the instance, wait for a predefined period, and then check the the instance state. If this state is not set as defined by the action, a notification is sent to the SNS topic. The function will log to CloudWatch logs info and error messages, and will return the region and the instance ID via the ResponseClass (just for testing).
+The handleRequest function will either stop or start the instance, wait for a predefined period, and then check the instance state. If this state is not set as defined by the action, a notification is sent to the SNS topic. The function will log to CloudWatch logs info and error messages, and will return the region and the instance ID via the ResponseClass (just for testing).
 
 The "stopstartEC2" CloudFormation script will configure the Lambda function and the IAM role and policy. The StopStartEC2InstancePolicy policy will permit the function to:
     a.) Create CloudWatch Group, Streams, and write to the logs.
@@ -17,7 +17,7 @@ The "stopstartEC2" CloudFormation script will configure the Lambda function and 
     d.) Stop and start EC2 instance which must have the "LambdaStartStopControl" tag set to "true".
 It will export Lambda function ARN and the Lambda function name for the CloudFormation script that schedules the actions.
 
-The "schedulerulestartstopEC2" CloudFromation script will configure the CloudWatch Event Rule to send an event to Lambda function. It imports the LamdaFunction name and ARN from the "stopstartEC2" CloudFormation script, configures the schedule that the event occurs and configures the input parameters to be passed to the Lambda Java function. Also it configures the permissions so that it can invoke the Lambda function with the event.
+The "schedulerulestartstopEC2" CloudFormation script will configure the CloudWatch Event Rule to send an event to Lambda function. It imports the LamdaFunction name and ARN from the "stopstartEC2" CloudFormation script, configures the schedule that the event occurs and configures the input parameters to be passed to the Lambda Java function. Also it configures the permissions so that it can invoke the Lambda function with the event.
 
 ## Getting Started
 
@@ -28,14 +28,14 @@ The Eclipse IDE for Java development has a nice AWS Lambda plugin and the AWS to
 The "stopstartEC2" CloudFormation script will require:
     a.) An S3 bucket must be created and the Zip Java class file is stored there. 
     b.) Rights to create IAM roles and policies, and the Lambda function.
-The "schedulerulestartstopEC2" CloudFromation script will require:
+The "schedulerulestartstopEC2" CloudFormation script will require:
     a.) An SNS topic with an associated email address to receive notifications.
     b.) The "stopstartEC2" CloudFormation script needs to have been executed successfully.
     c.) An EC2 instance with a tag named "LambdaStartStopControl" set to "true".
 
 ### Installing
 
-Ensure that the Java class zip files is in the S3 bucket and then run the "stopstartEC2" CloudForamtion script via console or AWS CLI. It will prompt for:
+Ensure that the Java class zip files is in the S3 bucket and then run the "stopstartEC2" CloudFormation script via console or AWS CLI. It will prompt for:
 
     a.) IAM role name that will be created amd used by the Lambda function - The CloudFormation created IAM role allows Lambda fn to start and stop instances and send notifications to SNS. It will be created.
     b.) Lambda function name - The name of the Lambda function.
@@ -47,7 +47,7 @@ Ensure that the Java class zip files is in the S3 bucket and then run the "stops
     h.) Your name.
     
    
-Next execute  "schedulerulestartstopEC2" CloudFromation script. It will prompt for:
+Next execute  "schedulerulestartstopEC2" CloudFormation script. It will prompt for:
 
       a.) The name of the stack used to create stop/start Lambda function - The stack name which was used to create the start stop Lambda function. It is needed since information is pulled from the Lambda function creation stack.
       b.) The name of the schedule event rule name - The schedule event name (must be unique).
