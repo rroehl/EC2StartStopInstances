@@ -2,9 +2,9 @@
 
 The product will allow the scheduling of the starting and stopping EC2 instances. The repo contains a Java Lambda function and CloudFormation JSON scripts to configure the Lambda function and schedule the starting and stopping of EC2 instances.
 
-The LambdaFunctionHandler class has five inputed parameters that are passed to it from the AWS scheduled event via the RequestClass:
-    a.)instance - The instance ID to which the action will be applied ("i-004aa8aetd9736e2e").
-    b.)region - The AWS region in which it is installed ("us-east-2").
+The LambdaFunctionHandler class has five inputted parameters that are passed to it from the AWS scheduled event via the RequestClass:
+    a.) instance - The instance ID to which the action will be applied ("i-004aa8aetd9736e2e").
+    b.) region - The AWS region in which it is installed ("us-east-2").
     c.) action - Either "Stop" or "Start" action applied to the instance.
     d.) timewaitseconds - The time in seconds between the action being applied to the instance and when the instance is tested to ensure that action is accomplished ( -- optional).
     e.) topicarn - The SNS ARN topic to which the notification is sent in the event the action is not accomplished in the defined period ("arn:aws:sns:us-east-2:638158650817:EmailTopic" -- optional).
@@ -37,7 +37,7 @@ The "schedulerulestartstopEC2" CloudFormation script will require:
 
 Ensure that the Java class zip files is in the S3 bucket and then run the "stopstartEC2" CloudFormation script via console or AWS CLI. It will prompt for:
 
-    a.) IAM role name that will be created amd used by the Lambda function - The CloudFormation created IAM role allows Lambda fn to start and stop instances and send notifications to SNS. It will be created.
+    a.) IAM role name that will be created and used by the Lambda function - The CloudFormation created IAM role allows Lambda fn to start and stop instances and send notifications to SNS. It will be created.
     b.) Lambda function name - The name of the Lambda function.
     c.) Lambda function timeout - he function execution time (in seconds) after which Lambda terminates the function. It has to be greater that the longest instance startup or stopping time (300 sec. is the max.).
     d.) Lambda function memory usage size - The amount of memory, in MB, that is allocated to your Lambda function.
