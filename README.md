@@ -1,5 +1,7 @@
 # AWS Schedule ECS Start Stop Instances Lambda Function
 
+## version 1.0.0
+
 The product will allow the scheduling of the starting and stopping EC2 instances. The repo contains a Java Lambda function and CloudFormation JSON scripts to configure the Lambda function and schedule the starting and stopping of EC2 instances.
 
 The LambdaFunctionHandler class has five inputted parameters that are passed to it from the AWS scheduled event via the RequestClass:
