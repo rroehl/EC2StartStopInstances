@@ -5,10 +5,17 @@ import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.regions.Regions;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
+import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.sns.AmazonSNS;
@@ -22,7 +29,76 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 	private String topicArn;
 	private String region;
 	private String instance_id;
+	private String instancename;
 	private String action;
+	
+	private int GetInstanceIDFromName( AmazonEC2 ec2, String tag_name, String instance_name, Context context)
+	{
+		 boolean finished = false;
+		 String sz_status;
+		 Integer instance_count=0;
+		 
+	     try
+	     {
+	        //Set filter
+	        List<String> values = new ArrayList<>();
+	        values.add(instance_name);
+	           
+	        Filter filter = new Filter()
+	        		.withName("tag:" + tag_name.toString())
+	        		.withValues(values);
+	        
+	        DescribeInstancesRequest request = new DescribeInstancesRequest()
+	        		.withFilters(filter);
+	 
+	        while(!finished) 
+	        {
+	            DescribeInstancesResult response = ec2.describeInstances(request);
+
+	            for(Reservation reservation : response.getReservations()) 
+	            {
+	                for(Instance instance : reservation.getInstances()) 
+	                {
+	                	instance_count++; //Count the number of matches
+	                	this.instance_id =  instance.getInstanceId().toString();
+	                }
+	            }
+
+	            request.setNextToken(response.getNextToken());
+
+	            if(response.getNextToken() == null) 
+	            {
+	                finished = true;
+	            }
+	        }
+	        if(instance_count == 0 )  //No instance id found
+	        {
+	        	sz_status =  "******* The instance id for server name " + instance_name + " was not found.\n";	
+	        	context.getLogger().log(sz_status);  
+       		    PublishAlert(sz_status, topicArn,  region, context);
+	        }
+	        else
+	        {
+	        	  if(instance_count > 1) //More than one instance id found
+	        	  {
+	        		  sz_status = "******* There are " + instance_count.toString() + " instances with server name " +  instance_name + " was not found.\n";
+	        		  context.getLogger().log(sz_status);  
+	        		  PublishAlert(sz_status, topicArn,  region, context);
+	        	  }
+	        }     	 
+	     }
+	     catch(AmazonServiceException ase) 
+			{
+				context.getLogger().log("Target Topic ARN: " + topicArn);
+				context.getLogger().log("Caught Exception: " + ase.getMessage());
+				context.getLogger().log("Reponse Status Code: " + ase.getStatusCode());
+				context.getLogger().log("Error Code: " + ase.getErrorCode());
+				context.getLogger().log("Request ID: " + ase.getRequestId());
+	    	 
+	     }
+	     return instance_count;
+	   
+	}
 	
 	private void  PublishAlert(String msg, String topicArn, String region,Context context)
 	{	
@@ -154,68 +230,77 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 		try
 		{		
 			context.getLogger().log("--------------------------------------------------------------------------------------------------------\n");
-			context.getLogger().log("Input Data -Instance ID: " + request.instance +" -Region: " + request.region + " -Action: " +request.action + " -Wait time: " + request.timewaitseconds+ " sec -SNS Topic ARN: "+ request.topicarn + " \n");
+			context.getLogger().log("Input Data -Instance name: " + request.instancename + " -Instance Tag Name: " + request.instancetagname + " -Region: " + request.region + " -Action: " +request.action + " -Wait time: " + request.timewaitseconds+ " sec -SNS Topic ARN: "+ request.topicarn + " \n");
 			
 			// Verify parameters
-			if( request.region != null && request.instance != null && request.action != null
-			 && !request.region.isEmpty() && !request.instance.isEmpty() && !request.action.isEmpty()
+			if( request.region != null && request.instancename != null && request.action != null  && request.instancetagname != null
+			 && !request.region.isEmpty() && !request.instancename.isEmpty() && !request.action.isEmpty()  && !request.instancetagname.isEmpty()  
 					)
 			{
 				this.region = request.region;
 				this.topicArn = request.topicarn;
-				this.instance_id = request.instance;
+				this.instancename = request.instancename;
 				this.action = request.action;
 				
 				AmazonEC2 ec2 = AmazonEC2ClientBuilder.standard()
 	        		 	.withRegion(Regions.fromName(request.region))
 	        		 	.build(); 
-	        
-		         //Check instance state 
-				instance_state = GetInstanceState(ec2);
-				//Start Instance
-				if(this.action.equalsIgnoreCase("start"))
-				{
-			        if(instance_state == 80) // 80 == stopped or 64 == stopping
-				    {
-				        StartInstancesRequest start_instance_request = new StartInstancesRequest()
-				            .withInstanceIds(this.instance_id);
 				
-				        ec2.startInstances(start_instance_request);
-				        
-				        context.getLogger().log("Successfully starting instance " +  this.instance_id + "\n");
-
-				        CheckInstanceFinalStatusStatus( ec2, request.timewaitseconds,context);
-				     }
-				     else
-				     {
-				        	context.getLogger().log("Instance " +  this.instance_id + "was already running... state = " + instance_state.toString() + "\n");
-				     }
-				}
-				//Stop Instance
-				if(request.action.equalsIgnoreCase("stop"))
+				if( GetInstanceIDFromName(ec2, "Name", this.instancename, context) == 1)  //Lookup instance id by instance name
 				{
-			        //Check instance state
-			        if( instance_state == 16) // 16 == running or 0 == pending state 
-				    {
-				        StopInstancesRequest stop_instance_request = new StopInstancesRequest()
-				            .withInstanceIds(this.instance_id);
-				
-				        ec2.stopInstances(stop_instance_request);
-				        
-				        context.getLogger().log("Successfully stopping instance " +  this.instance_id + "\n");
+			         //Check instance state 
+					instance_state = GetInstanceState(ec2);
+					//Start Instance
+					if(this.action.equalsIgnoreCase("start"))
+					{
+				        if(instance_state == 80) // 80 == stopped or 64 == stopping
+					    {
+					        StartInstancesRequest start_instance_request = new StartInstancesRequest()
+					            .withInstanceIds(this.instance_id);
+					
+					        ec2.startInstances(start_instance_request);
+					        
+					        context.getLogger().log("Successfully starting instance " +  this.instance_id + "\n");
 	
-				        CheckInstanceFinalStatusStatus( ec2, request.timewaitseconds, context);
-				     }
-				     else
-				     {
-				        	context.getLogger().log("Instance " +  this.instance_id + " was already not running... state = " + instance_state.toString() + "\n");
-				     }
+					        CheckInstanceFinalStatusStatus( ec2, request.timewaitseconds,context);
+					     }
+					     else
+					     {
+					        	context.getLogger().log("Instance " +  this.instance_id + "was already running... state = " + instance_state.toString() + "\n");
+					     }
+					}
+					//Stop Instance
+					if(request.action.equalsIgnoreCase("stop"))
+					{
+				        //Check instance state
+				        if( instance_state == 16) // 16 == running or 0 == pending state 
+					    {
+					        StopInstancesRequest stop_instance_request = new StopInstancesRequest()
+					            .withInstanceIds(this.instance_id);
+					
+					        ec2.stopInstances(stop_instance_request);
+					        
+					        context.getLogger().log("Successfully stopping instance " +  this.instance_id + "\n");
+		
+					        CheckInstanceFinalStatusStatus( ec2, request.timewaitseconds, context);
+					     }
+					     else
+					     {
+					        	context.getLogger().log("Instance " +  this.instance_id + " was already not running... state = " + instance_state.toString() + "\n");
+					     }
+					}
+				
 				}
+				else
+				{
+					
+				}
+				
 			}
 			else
 			{
 				//Missing input data needs to be corrected 
-				context.getLogger().log("Missing Input Data: -Instance ID: " + request.instance +" -Region: " + request.region + " -Action: " +request.action + " \n");
+				context.getLogger().log("Missing Input Data: -Instance ID: " + request.instancename + " -Instance Tag Name: " + request.instancetagname + " -Region: " + request.region + " -Action: " +request.action + " \n");
 			}
 		}
 	   catch (AmazonServiceException ase) 
