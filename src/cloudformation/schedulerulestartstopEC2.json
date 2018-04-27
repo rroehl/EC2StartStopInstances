@@ -13,7 +13,8 @@
           [
             "LambdaStackNameParameter",
             "ScheduleEC2EventName",
-            "EC2InstanceId",
+            "EC2InstanceName",
+            "InstanceTagName",
             "StartorStopAcion",
             "CronExpression",
             "instancestartstopwaittime",
@@ -26,7 +27,8 @@
       {
         "LambdaStackNameParameter": { "default": "What is the name of the stack used to create stop/start Lambda function?"},
         "ScheduleEC2EventName": { "default": "What is the name of the schedule event rule name?"},
-        "EC2InstanceId" :  { "default": "What is the EC2 instance ID?"},
+        "EC2InstanceName" :  { "default": "What is the EC2 instance name?"},
+        "InstanceTagName" :  { "default": "What is the EC2 instance tag name?"},
         "StartorStopAcion" :  { "default": "Do you want to start or stop the EC2 instance?"},
         "CronExpression" : { "default": "What is the Cron expression for the schedule (UTC only)?"},
         "instancestartstopwaittime" : { "default": "What is the time  (sec.) to wait before checking the instance state?"},
@@ -49,15 +51,22 @@
     {
       "Description"   :   "The schedule event name (must be unique).",
       "Type"          :   "String",
-      "Default" : "Schedule{Instance ID}To{start of stop}",
+      "Default" : "Schedule{Instance name}To{start or stop}",
       "ConstraintDescription" : "The schedule event name (must be unique)."
     },
-    "EC2InstanceId" :
+    "EC2InstanceName" :
     {
-      "Description"   :   "The EC2 instance id that the action will be applied to.",
+      "Description"   :   "The EC2 instance name that the action will be applied to.It is case sensitive and is a tag value.",
       "Type"          :   "String",
-      "Default" :         "i-",
-      "ConstraintDescription" : "The EC2 instance id."
+      "Default" :         "aws",
+      "ConstraintDescription" : "The EC2 instance name."
+    },
+    "InstanceTagName" :
+    {
+      "Description"   :   "The EC2 instance tag name that the instance name is associated with.It is case sensitive and will most likely be \"Name\".",
+      "Type"          :   "String",
+      "Default" :         "Name",
+      "ConstraintDescription" : "The EC2 instance tage name."
     },
     "StartorStopAcion" :
     {
@@ -122,8 +131,11 @@
                 "{ \"region\": \"",
                 { "Ref" : "AWS::Region"},
                           
-                "\",   \"instance\": \"",
-                {"Ref" : "EC2InstanceId"},
+                "\",   \"name\": \"",
+                {"Ref" : "EC2InstanceName"},
+                
+                 "\",   \"tag\": \"",
+                {"Ref" : "InstanceTagName"},
                 
                 "\",   \"action\": \"",
                 {"Ref" : "StartorStopAcion"},

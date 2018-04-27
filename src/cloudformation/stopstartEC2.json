@@ -81,7 +81,7 @@
     {
       "Description"   :   "Please ensure that the zip of the Lambda code is on the S3 bucket. It has to be manually copied to the S3 bucket.",
       "Type"          :   "String",
-      "Default" : "EC2StartStopInstanceFn.zip",
+      "Default" : "StopStartEC2Instance.zip",
       "ConstraintDescription" : "The name of the Zip source code of your Lambda function. Please ensure it is already copied to the S3 bucket."
     },
    

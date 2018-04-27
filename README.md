@@ -70,4 +70,3 @@ This project is licensed under the Apache License - see the [LICENSE.md](LICENSE
 
 * There many great sites with information that help build this little project. Thanks to all of them.
 
-

@@ -3,12 +3,26 @@ package com.amazonaws.lambda.startstopinstances;
 public class RequestClass 
 {
 	String region;
-	String instance;
+	String name;
+	String tag;
 	String action;
 	String timewaitseconds;
 	String topicarn;
+    /*
+     * 
+     	{
+     	"region": "us-east-2",
+	 	"name": "testlinux",
+	 	"tag": "Name",
+	 	"action": "Start",
+	 	"timewaitseconds": "180",
+	 	"topicarn": "arn:aws:sns:us-east-2:638139650817:TestTopic"
+		}
+   
+     */
 	
-    public String getRegion() {
+    public String getRegion() 
+    {
         return region;
     }
     public void setRegion(String region) 
@@ -16,11 +30,23 @@ public class RequestClass
         this.region = region; 
     }
     
-    public String getInstance() {
-        return instance;
+    public String getName() 
+    {
+        return name;
     }
-    public void setInstance(String instance) {
-        this.instance = instance;
+    public void setName(String name) 
+    {
+        this.name = name;
+    }
+    
+    public String getTag() 
+    {
+        return tag;
+    }
+    
+    public void setTag(String tag) 
+    {
+        this.tag = tag;
     }
     
     public String getAction() {
@@ -44,13 +70,15 @@ public class RequestClass
     {
         this.topicarn = topicarn; 
     }
-    public RequestClass(String region, String instance, String  action, String timewaitseconds,String topicarn)
+    public RequestClass(String region, String name, String tag, String  action, String timewaitseconds,String topicarn)
     {
         this.region = region;
-        this.instance = instance;
+        this.name = name;
+        this.tag = tag;
         this.action = action;
         this.timewaitseconds = timewaitseconds;
         this.topicarn = topicarn;
+        
     }
     public RequestClass() {
     }
