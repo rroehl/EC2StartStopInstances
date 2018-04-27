@@ -12,7 +12,7 @@
           "Parameters" :
           [
             "LambdaStackNameParameter",
-            "ScheduleEC2EventName",
+            "EC2InstanceName",
             "InstanceTagName",
             "StartorStopAcion",
             "CronExpression",
@@ -108,7 +108,7 @@
       {
         "Description" : "Schedule EC2 Instance Stop and Start",
         "Name" :  {"Fn::Join" : [ "", ["Schedule", { "Ref" : "EC2InstanceName"}, "To",{"Ref" : "StartorStopAcion"} ] ] },
-        "ScheduleExpression" : {"Fn::Join" : ["", ["cron", {"Ref" : "CronExpression"}]]},
+        "ScheduleExpression" : {"Fn::Join" : ["", ["cron", {"Ref" : "CronExpression"},"At",{"Ref": "CronExpression"}]]},
         "State" : "ENABLED",
         "Targets" :
         [{
