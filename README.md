@@ -5,12 +5,13 @@
 The product will allow the scheduling of the starting and stopping EC2 instances. The repo contains a Java Lambda function and CloudFormation JSON scripts to configure the Lambda function and schedule the starting and stopping of EC2 instances.
 
 The LambdaFunctionHandler class has five inputted parameters that are passed to it from the AWS scheduled event via the RequestClass:
-    a.) instance - The instance ID to which the action will be applied ("i-004aa8aetd9736e2e").
+    a.) instance - The instance name to which the action will be applied.
     b.) region - The AWS region in which it is installed ("us-east-2").
     c.) action - Either "Stop" or "Start" action applied to the instance.
     d.) timewaitseconds - The time in seconds between the action being applied to the instance and when the instance is tested to ensure that action is accomplished ( -- optional).
     e.) topicarn - The SNS ARN topic to which the notification is sent in the event the action is not accomplished in the defined period ("arn:aws:sns:us-east-2:638158650817:EmailTopic" -- optional).
-The handleRequest function will either stop or start the instance, wait for a predefined period, and then check the instance state. If this state is not set as defined by the action, a notification is sent to the SNS topic. The function will log to CloudWatch logs info and error messages, and will return the region and the instance ID via the ResponseClass (just for testing).
+    f.) name - The instance tag name for the instance name. Usually Name.
+The handleRequest function will either stop or start the instance, wait for a predefined period, and then check the instance state. If this state is not set as defined by the action, a notification is sent to the SNS topic. The function will log to CloudWatch logs info and error messages, and will return the region and the instance ID via the ResponseClass (just for testing). It will look up the instance ID from the instance name passed to it.
 
 The "stopstartEC2" CloudFormation script will configure the Lambda function and the IAM role and policy. The StopStartEC2InstancePolicy policy will permit the function to:
     a.) Create CloudWatch Group, Streams, and write to the logs.
@@ -53,12 +54,13 @@ Next execute  "schedulerulestartstopEC2" CloudFormation script. It will prompt f
 
       a.) The name of the stack used to create stop/start Lambda function - The stack name which was used to create the start stop Lambda function. It is needed since information is pulled from the Lambda function creation stack.
       b.) The name of the schedule event rule name - The schedule event name (must be unique).
-      c.)The EC2 instance id - The EC2 instance id that the action will be applied to.
-      d.) The start or stop action - Start or stop the EC2 instance.
-      e.) The Cron expression for the schedule (UTC only) - The format is (min hrs day-of-mnth mnth day-of-wk) and the time is in UTC time.  See doc at https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html.
-      f.) The time (sec.) to wait before checking the instance state - This is the time between starting and stopping the instance and checking if it is in the correct state. The value is limited by the maximum time of 5 minutes (300 sec.) that Lambda function can execute. 
-      g.) SNS notification ARN - The SNS topic ARN is used by the Lambda function to send a notification if after the wait period the instance state is not in the desired stop or start state.
-      h.) Your name.
+      c.) The EC2 instance name - The EC2 instance name that the action will be applied to.
+      d.) The tag name associated with the instance name. Almost always Name
+      f.) jhe start or stop action - Start or stop the EC2 instance.
+      g.) The Cron expression for the schedule (UTC only) - The format is (min hrs day-of-mnth mnth day-of-wk) and the time is in UTC time.  See doc at https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html.
+      h.) The time (sec.) to wait before checking the instance state - This is the time between starting and stopping the instance and checking if it is in the correct state. The value is limited by the maximum time of 5 minutes (300 sec.) that Lambda function can execute. 
+      i.) SNS notification ARN - The SNS topic ARN is used by the Lambda function to send a notification if after the wait period the instance state is not in the desired stop or start state.
+      g.) Your name.
 
 ## License
 
