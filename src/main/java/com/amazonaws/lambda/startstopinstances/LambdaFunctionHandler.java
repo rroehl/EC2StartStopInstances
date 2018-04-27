@@ -40,7 +40,7 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 		 
 	     try
 	     {
-	        //Set filter
+	        //Set filter to the tag with anme Name
 	        List<String> values = new ArrayList<>();
 	        values.add(instance_name);
 	           
@@ -184,7 +184,7 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 				else
 				{
 				//Alert Instance was not successfully started
-					sz_status = "******* The " + this.instance_id + " instance was NOT sucessfully started in " + sleep_seconds + " seconds. It is in the "+ sz_state + " state!\n";
+					sz_status = "******* The " + this.instancename + " with ID "+ this.instance_id + "  was NOT sucessfully started in " + sleep_seconds + " seconds. It is in the "+ sz_state + " state!\n";
 					
 					PublishAlert(sz_status, topicArn,  region, context);
 				}
@@ -200,7 +200,7 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 					else
 					{
 						//Alert Instance was not successfully started
-						sz_status = "******* The " + this.instance_id + " instance was NOT sucessfully stopped in " + sleep_seconds + " seconds. It is in the "+ sz_state + " state!\n";
+						sz_status = "******* The " + this.instancename + " with ID "+ this.instance_id  + " was NOT sucessfully stopped in " + sleep_seconds + " seconds. It is in the "+ sz_state + " state!\n";
 						PublishAlert(sz_status, topicArn,  region, context);
 					}
 				}
@@ -230,7 +230,7 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 		try
 		{		
 			context.getLogger().log("------------------------------------------------------------------------------------------------------\n");
-			context.getLogger().log("4 Input Data -Instance name: " + request.name + " -Instance Tag Name: " + request.tag + " -Region: " + request.region + " -Action: " +request.action + " -Wait time: " + request.timewaitseconds+ " sec -SNS Topic ARN: "+ request.topicarn + " \n");
+			context.getLogger().log("Input Data -Instance name: " + request.name + " -Instance Tag Name: " + request.tag + " -Region: " + request.region + " -Action: " +request.action + " -Wait time: " + request.timewaitseconds+ " sec -SNS Topic ARN: "+ request.topicarn + " \n");
 			
 			// Verify parameters
 			if( request.region != null && request.name != null && request.action != null  && request.tag != null
@@ -260,13 +260,13 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 					
 					        ec2.startInstances(start_instance_request);
 					        
-					        context.getLogger().log("Successfully starting instance " +  this.instance_id + "\n");
+					        context.getLogger().log("Successfully starting instance " +  this.instancename + " with ID "+ this.instancename + "\n");
 	
 					        CheckInstanceFinalStatusStatus( ec2, request.timewaitseconds,context);
 					     }
 					     else
 					     {
-					        	context.getLogger().log("Instance " +  this.instance_id + "was already running... state = " + instance_state.toString() + "\n");
+					        	context.getLogger().log("Instance " + this.instancename + " with ID "+ this.instance_id + " was already running... state = " + instance_state.toString() + "\n");
 					     }
 					}
 					//Stop Instance
@@ -286,7 +286,7 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 					     }
 					     else
 					     {
-					        	context.getLogger().log("Instance " +  this.instance_id + " was already not running... state = " + instance_state.toString() + "\n");
+					        	context.getLogger().log("Instance " + this.instancename + " with ID "+ this.instance_id + " was already not running... state = " + instance_state.toString() + "\n");
 					     }
 					}
 				
