@@ -13,6 +13,7 @@
           [
             "LambdaStackNameParameter",
             "ScheduleEC2EventName",
+            "EC2InstanceName",
             "InstanceTagName",
             "StartorStopAcion",
             "CronExpression",
@@ -22,9 +23,10 @@
           ]
         }
       ],
-      "ParameterLabels" :  
+      "ParameterLabels" :
       {
         "LambdaStackNameParameter": { "default": "What is the name of the stack used to create stop/start Lambda function?"},
+        "ScheduleEC2EventName": { "default": "What is the name of the schedule event rule name?"},
         "EC2InstanceName" :  { "default": "What is the EC2 instance name?"},
         "InstanceTagName" :  { "default": "What is the EC2 instance tag name?"},
         "StartorStopAcion" :  { "default": "Do you want to start or stop the EC2 instance?"},
@@ -44,6 +46,13 @@
       "Type"          :   "String",
       "Default" : "{Lambda fn stack creation name}",
       "ConstraintDescription" : "The stack name used to create the lambda function."
+    },
+    "ScheduleEC2EventName" :
+    {
+      "Description"   :   "The schedule event name (must be unique).",
+      "Type"          :   "String",
+      "Default" : "Schedule{Instance name}To{start or stop}",
+      "ConstraintDescription" : "The schedule event name (must be unique)."
     },
     "EC2InstanceName" :
     {
@@ -107,7 +116,7 @@
       "Properties" :
       {
         "Description" : "Schedule EC2 Instance Stop and Start",
-        "Name" :  {"Fn::Join" : [ "", ["Schedule", { "Ref" : "EC2InstanceName"}, "To",{"Ref" : "StartorStopAcion"} ] ] },
+        "Name" : {"Ref": "ScheduleEC2EventName"},
         "ScheduleExpression" : {"Fn::Join" : ["", ["cron", {"Ref" : "CronExpression"}]]},
         "State" : "ENABLED",
         "Targets" :
