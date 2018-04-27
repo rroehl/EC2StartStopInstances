@@ -1,15 +1,16 @@
 package com.amazonaws.lambda.startstopinstances;
 
 public class ResponseClass {
-
-    String instance;
+	
     String region;
+    String name;
 
-    public String getInstance() {
-        return instance;
+
+    public String getName() {
+        return name;
     }
-    public void setInstance(String instance_id) {
-        this.instance = instance_id;
+    public void setName(String name) {
+        this.name = name;
     }
     
     public String getRegion() {
@@ -19,9 +20,9 @@ public class ResponseClass {
         this.region = region;
     }
     
-    public ResponseClass(String region, String instance_id) 
+    public ResponseClass(String region, String name) 
     {
-        this.instance = instance_id;
+        this.name = name;
         this.region = region;
     }
     

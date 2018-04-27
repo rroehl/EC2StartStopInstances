@@ -28,7 +28,7 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 {
 	private String topicArn;
 	private String region;
-	private String instance_id;
+	private String instance_id;     
 	private String instancename;
 	private String action;
 	
@@ -229,17 +229,17 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 		Integer instance_state;
 		try
 		{		
-			context.getLogger().log("--------------------------------------------------------------------------------------------------------\n");
-			context.getLogger().log("Input Data -Instance name: " + request.instancename + " -Instance Tag Name: " + request.instancetagname + " -Region: " + request.region + " -Action: " +request.action + " -Wait time: " + request.timewaitseconds+ " sec -SNS Topic ARN: "+ request.topicarn + " \n");
+			context.getLogger().log("------------------------------------------------------------------------------------------------------\n");
+			context.getLogger().log("4 Input Data -Instance name: " + request.name + " -Instance Tag Name: " + request.tag + " -Region: " + request.region + " -Action: " +request.action + " -Wait time: " + request.timewaitseconds+ " sec -SNS Topic ARN: "+ request.topicarn + " \n");
 			
 			// Verify parameters
-			if( request.region != null && request.instancename != null && request.action != null  && request.instancetagname != null
-			 && !request.region.isEmpty() && !request.instancename.isEmpty() && !request.action.isEmpty()  && !request.instancetagname.isEmpty()  
+			if( request.region != null && request.name != null && request.action != null  && request.tag != null
+			 && !request.region.isEmpty() && !request.name.isEmpty() && !request.action.isEmpty()  && !request.tag.isEmpty()  
 					)
 			{
 				this.region = request.region;
 				this.topicArn = request.topicarn;
-				this.instancename = request.instancename;
+				this.instancename = request.name;
 				this.action = request.action;
 				
 				AmazonEC2 ec2 = AmazonEC2ClientBuilder.standard()
@@ -300,7 +300,7 @@ public class LambdaFunctionHandler implements RequestHandler<RequestClass, Respo
 			else
 			{
 				//Missing input data needs to be corrected 
-				context.getLogger().log("Missing Input Data: -Instance ID: " + request.instancename + " -Instance Tag Name: " + request.instancetagname + " -Region: " + request.region + " -Action: " +request.action + " \n");
+				context.getLogger().log("Missing Input Data: -Instance ID: " + request.name + " -Instance Tag Name: " + request.tag + " -Region: " + request.region + " -Action: " +request.action + " \n");
 			}
 		}
 	   catch (AmazonServiceException ase) 

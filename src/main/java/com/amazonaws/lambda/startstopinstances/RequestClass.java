@@ -3,8 +3,8 @@ package com.amazonaws.lambda.startstopinstances;
 public class RequestClass 
 {
 	String region;
-	String instancename;
-	String instancetagname;
+	String name;
+	String tag;
 	String action;
 	String timewaitseconds;
 	String topicarn;
@@ -12,8 +12,8 @@ public class RequestClass
      * 
      	{
      	"region": "us-east-2",
-	 	"instancename": "testlinux",
-	 	"instancetagname": "Name",
+	 	"name": "testlinux",
+	 	"tag": "Name",
 	 	"action": "Start",
 	 	"timewaitseconds": "180",
 	 	"topicarn": "arn:aws:sns:us-east-2:638139650817:TestTopic"
@@ -21,7 +21,8 @@ public class RequestClass
    
      */
 	
-    public String getRegion() {
+    public String getRegion() 
+    {
         return region;
     }
     public void setRegion(String region) 
@@ -29,18 +30,23 @@ public class RequestClass
         this.region = region; 
     }
     
-    public String getInstanceName() {
-        return instancename;
+    public String getName() 
+    {
+        return name;
     }
-    public void setInstanceName(String instancename) {
-        this.instancename = instancename;
+    public void setName(String name) 
+    {
+        this.name = name;
     }
     
-    public String getInstanceTagName() {
-        return instancetagname;
+    public String getTag() 
+    {
+        return tag;
     }
-    public void setIInstanceTagName(String instancetagname) {
-        this.instancetagname = instancetagname;
+    
+    public void setTag(String tag) 
+    {
+        this.tag = tag;
     }
     
     public String getAction() {
@@ -64,11 +70,11 @@ public class RequestClass
     {
         this.topicarn = topicarn; 
     }
-    public RequestClass(String region, String instancename, String instancetagname, String  action, String timewaitseconds,String topicarn)
+    public RequestClass(String region, String name, String tag, String  action, String timewaitseconds,String topicarn)
     {
         this.region = region;
-        this.instancename = instancename;
-        this.instancetagname = instancetagname;
+        this.name = name;
+        this.tag = tag;
         this.action = action;
         this.timewaitseconds = timewaitseconds;
         this.topicarn = topicarn;
