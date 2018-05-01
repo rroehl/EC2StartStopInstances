@@ -212,10 +212,7 @@
       }
     },
     
-    
-    
-    
-    "PermissionForEventsToInvokeLambda" :
+    "PermissionForStopEventsToInvokeLambda" :
     {
       "Type" : "AWS::Lambda::Permission",
       "Properties" : {
@@ -223,10 +220,21 @@
 
         "FunctionName" : {"Fn::ImportValue" : {"Fn::Sub" : "${LambdaStackNameParameter}-LambdaFnName"}},
         "Principal" :  "events.amazonaws.com",
-        "SourceArn" :  { "Fn::GetAtt": ["StopScheduleEC2StopStartRule", "Arn"] }
+        "SourceArn" :  { "Fn::GetAtt": ["StopScheduleEC2Rule", "Arn"] }
+      }
+    },
+    
+   "PermissionForStartEventsToInvokeLambda" :
+    {
+      "Type" : "AWS::Lambda::Permission",
+      "Properties" : {
+        "Action" : "lambda:InvokeFunction",
+
+        "FunctionName" : {"Fn::ImportValue" : {"Fn::Sub" : "${LambdaStackNameParameter}-LambdaFnName"}},
+        "Principal" :  "events.amazonaws.com",
+        "SourceArn" :  { "Fn::GetAtt": ["StartScheduleEC2Rule", "Arn"] }
       }
     }
-
 
   },
 
