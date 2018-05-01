@@ -59,14 +59,14 @@
     {
       "Description"   :   "The stop schedule event name (must be unique).",
       "Type"          :   "String",
-      "Default" : "Schedule{Instance name}To{start or stop}",
+      "Default" : "Schedule{Instance name}ToStop",
       "ConstraintDescription" : "The schedule event name (must be unique)."
     },
     "StartScheduleEC2EventName" :
     {
-      "Description"   :   "The stop schedule event name (must be unique).",
+      "Description"   :   "The start schedule event name (must be unique).",
       "Type"          :   "String",
-      "Default" : "Schedule{Instance name}To{start or stop}",
+      "Default" : "Schedule{Instance name}ToStart",
       "ConstraintDescription" : "The schedule event name (must be unique)."
     },
     

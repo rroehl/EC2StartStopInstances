@@ -50,17 +50,30 @@ Ensure that the Java class zip files is in the S3 bucket and then run the "stops
     h.) Your name.
     
    
-Next execute  "schedulerulestartstopEC2" CloudFormation script. It will prompt for:
+Next execute  "schedulerulestartorstopEC2" or schedulerulestartandstopEC2 CloudFormation script. The difference is that the former will allow you to either start or stop the instance and the later will configure stop and start of an instance. The "schedulerulestartororstopEC2 will prompt for:
 
       a.) The name of the stack used to create stop/start Lambda function - The stack name which was used to create the start stop Lambda function. It is needed since information is pulled from the Lambda function creation stack.
       b.) The name of the schedule event rule name - The schedule event name (must be unique).
       c.) The EC2 instance name - The EC2 instance name that the action will be applied to.
       d.) The tag name associated with the instance name. Almost always Name
-      f.) jhe start or stop action - Start or stop the EC2 instance.
+      f.) The start or stop action - Start or stop the EC2 instance.
       g.) The Cron expression for the schedule (UTC only) - The format is (min hrs day-of-mnth mnth day-of-wk) and the time is in UTC time.  See doc at https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html.
       h.) The time (sec.) to wait before checking the instance state - This is the time between starting and stopping the instance and checking if it is in the correct state. The value is limited by the maximum time of 5 minutes (300 sec.) that Lambda function can execute. 
       i.) SNS notification ARN - The SNS topic ARN is used by the Lambda function to send a notification if after the wait period the instance state is not in the desired stop or start state.
       g.) Your name.
+      
+The "schedulerulestartorandstopEC2 will prompt for:
+
+      a.) The name of the stack used to create stop/start Lambda function - The stack name which was used to create the start stop Lambda function. It is needed since information is pulled from the Lambda function creation stack.
+      b.) The EC2 instance name - The EC2 instance name that the action will be applied to.
+      c.) The Cron expression for the stop schedule (UTC only) - The format is (min hrs day-of-mnth mnth day-of-wk) and the time is in UTC time.  See doc at https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html.
+      d.) The name of the stop schedule event rule name - The schedule event name (must be unique).
+      e.) The Cron expression for the start schedule (UTC only) - The format is (min hrs day-of-mnth mnth day-of-wk) and the time is in UTC time.  See doc at https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html.
+      f.) The name of the start schedule event rule name - The schedule event name (must be unique).
+      g.) The time (sec.) to wait before checking the instance state - This is the time between starting and stopping the instance and checking if it is in the correct state. The value is limited by the maximum time of 5 minutes (300 sec.) that Lambda function can execute. 
+      h.) The tag name associated with the instance name. Almost always Name
+      i.) SNS notification ARN - The SNS topic ARN is used by the Lambda function to send a notification if after the wait period the instance state is not in the desired stop or start state.
+      j.) Your name.
 
 ## License
 
