@@ -1,0 +1,237 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Metadata":
+  {
+    "AWS::CloudFormation::Interface" :
+    {
+      "ParameterGroups" :
+      [
+        {
+          "Label" : { "default" : "EC2 Start and Stop Role Event Configuration" },
+          "Parameters" :
+          [
+            "LambdaStackNameParameter",
+        
+            "EC2InstanceName",
+          
+            "StopCronExpression",
+            "StopScheduleEC2EventName",
+            "StartCronExpression",
+            "StartScheduleEC2EventName",
+            "instancestartstopwaittime",
+            "InstanceTagName",
+            
+            "snstopicarn",
+            "AuthorName"
+          ]
+        }
+      ],
+      "ParameterLabels" :
+      {
+        "LambdaStackNameParameter": { "default": "What is the name of the stack used to create stop/start Lambda function?"},
+        "EC2InstanceName" :  { "default": "What is the EC2 instance name?"},
+       
+        "StopCronExpression" : { "default": "What is the Cron expression for the stop schedule (UTC only)?"},
+        "StopScheduleEC2EventName": { "default": "What is the name of the stop schedule event rule name?"},
+        "StartCronExpression" : { "default": "What is the Cron expression for the start schedule (UTC only)?"},
+        "StartScheduleEC2EventName": { "default": "What is the name of the start schedule event rule name?"},
+        
+        "instancestartstopwaittime" : { "default": "What is the time  (sec.) to wait before checking the instance state?"},
+        
+        "InstanceTagName" :  { "default": "What is the EC2 instance tag name?"},
+        "snstopicarn" : { "default": "What is the SNS notification ARN?"},
+        "AuthorName" : {"default": "What is author's name?"}
+      }
+    }
+  },
+
+  "Parameters" :
+  {
+    "LambdaStackNameParameter" :
+    {
+      "Description"   :   "The stack name which was used to create the start stop Lambda function. It is needed since information is pulled from the Lambda function creation stack.",
+      "Type"          :   "String",
+      "Default" : "{Lambda fn stack creation name}",
+      "ConstraintDescription" : "The stack name used to create the lambda function."
+    },
+    "StopScheduleEC2EventName" :
+    {
+      "Description"   :   "The stop schedule event name (must be unique).",
+      "Type"          :   "String",
+      "Default" : "Schedule{Instance name}To{start or stop}",
+      "ConstraintDescription" : "The schedule event name (must be unique)."
+    },
+    "StartScheduleEC2EventName" :
+    {
+      "Description"   :   "The stop schedule event name (must be unique).",
+      "Type"          :   "String",
+      "Default" : "Schedule{Instance name}To{start or stop}",
+      "ConstraintDescription" : "The schedule event name (must be unique)."
+    },
+    
+    "EC2InstanceName" :
+    {
+      "Description"   :   "The EC2 instance name that the action will be applied to.It is case sensitive and is a tag value.",
+      "Type"          :   "String",
+      "Default" :         "aws",
+      "ConstraintDescription" : "The EC2 instance name."
+    },
+    "InstanceTagName" :
+    {
+      "Description"   :   "The EC2 instance tag name that the instance name is associated with.It is case sensitive and will most likely be \"Name\".",
+      "Type"          :   "String",
+      "Default" :         "Name",
+      "ConstraintDescription" : "The EC2 instance tage name."
+    },
+    "StopCronExpression" :
+    {
+      "Description"   : "The format is (min hrs day-of-mnth mnth day-of-wk) and the stop time is in UTC time. Examples: (30 2 ? * SAT *) == Friday 7:30 PM PST and  (30 22 ? * SUN *) == Sunday 4:30 PM PST. See doc at https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"  ,
+      "Type"          :   "String",
+      "Default" :         "(41 21 * * ? *)",
+      "ConstraintDescription" : "Cron expression rule for the schedule https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"
+    },
+    
+    "StartCronExpression" :
+    {
+      "Description"   : "The format is (min hrs day-of-mnth mnth day-of-wk) and the start time is in UTC time. Examples: (30 2 ? * SAT *) == Friday 7:30 PM PST and  (30 22 ? * SUN *) == Sunday 4:30 PM PST. See doc at https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"  ,
+      "Type"          :   "String",
+      "Default" :         "(41 21 * * ? *)",
+      "ConstraintDescription" : "Cron expression rule for the schedule https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"
+    },
+    
+    "instancestartstopwaittime" :
+    {
+      "Description"   : "This is the time between starting and stoping the instance and checking if it is in the correct state. The value is limited by the maximum time of 5 minutes (300 sec.) that Lambda function can execute. "  ,
+      "Type"          :   "String",
+      "Default" :         "180",
+      "ConstraintDescription" : "This is the time between starting or stoping the instance and checking if it is in the correct state."
+    },
+    
+    "snstopicarn" :
+    {
+      "Description"   : "The SNS topic ARN is used by the Lambda function to send a notification if after the wait period the instance state is not in the desired stop or start state."  ,
+      "Type"          :   "String",
+      "Default" :         "arn:aws:sns:{enter the region}:{enter the account ID}:{enter the topic name}",
+      "ConstraintDescription" : "The SNS topic ARN is used by the Lambda function to send a notification if after the wait prtiod the instance state is not in the desired stop or start state."
+    },  
+    "AuthorName" :
+    {
+      "Description"   :   "Author's name.",
+      "Type"          :   "String",
+      "Default" : "{Your name}",
+      "ConstraintDescription" : "What is your name?"
+    }
+  },
+
+  "Resources" :
+  {
+    "StopScheduleEC2Rule" :
+    {
+      "Type" : "AWS::Events::Rule",
+      "Properties" :
+      {
+        "Description" : "Schedule EC2 Instance Stop",
+        "Name" : {"Ref": "StopScheduleEC2EventName"},
+        "ScheduleExpression" : {"Fn::Join" : ["", ["cron", {"Ref" : "StopCronExpression"}]]},
+        "State" : "ENABLED",
+        "Targets" :
+        [{
+          "Arn":{"Fn::ImportValue" : {"Fn::Sub" : "${LambdaStackNameParameter}-LambdaFnARN"}},
+          "Id": {"Fn::Join" : ["", ["Target", {"Fn::ImportValue" : {"Fn::Sub" : "${LambdaStackNameParameter}-LambdaFnName"}},"V1"]]},
+          "Input":
+          {"Fn::Join" :
+            [
+              "",
+              [
+                "{ \"region\": \"",
+                { "Ref" : "AWS::Region"},
+                          
+                "\",   \"name\": \"",
+                {"Ref" : "EC2InstanceName"},
+                
+                 "\",   \"tag\": \"",
+                {"Ref" : "InstanceTagName"},
+                
+                "\",   \"action\": \"Stop",
+                
+                "\",   \"timewaitseconds\": \"",
+                {"Ref" : "instancestartstopwaittime"},
+                
+                "\",   \"topicarn\": \"",
+                {"Ref" : "snstopicarn"},
+     
+                "\" }"
+              ]
+            ]
+          }
+        }]
+      }
+    },
+    
+    "StartScheduleEC2Rule" :
+    {
+      "Type" : "AWS::Events::Rule",
+      "Properties" :
+      {
+        "Description" : "Schedule EC2 Instance Start",
+        "Name" : {"Ref": "StartScheduleEC2EventName"},
+        "ScheduleExpression" : {"Fn::Join" : ["", ["cron", {"Ref" : "StartCronExpression"}]]},
+        "State" : "ENABLED",
+        "Targets" :
+        [{
+          "Arn":{"Fn::ImportValue" : {"Fn::Sub" : "${LambdaStackNameParameter}-LambdaFnARN"}},
+          "Id": {"Fn::Join" : ["", ["Target", {"Fn::ImportValue" : {"Fn::Sub" : "${LambdaStackNameParameter}-LambdaFnName"}},"V1"]]},
+          "Input":
+          {"Fn::Join" :
+            [
+              "",
+              [
+                "{ \"region\": \"",
+                { "Ref" : "AWS::Region"},
+                          
+                "\",   \"name\": \"",
+                {"Ref" : "EC2InstanceName"},
+                
+                 "\",   \"tag\": \"",
+                {"Ref" : "InstanceTagName"},
+                
+                "\",   \"action\": \"Start",
+                
+                "\",   \"timewaitseconds\": \"",
+                {"Ref" : "instancestartstopwaittime"},
+                
+                "\",   \"topicarn\": \"",
+                {"Ref" : "snstopicarn"},
+     
+                "\" }"
+              ]
+            ]
+          }
+        }]
+      }
+    },
+    
+    
+    
+    
+    "PermissionForEventsToInvokeLambda" :
+    {
+      "Type" : "AWS::Lambda::Permission",
+      "Properties" : {
+        "Action" : "lambda:InvokeFunction",
+
+        "FunctionName" : {"Fn::ImportValue" : {"Fn::Sub" : "${LambdaStackNameParameter}-LambdaFnName"}},
+        "Principal" :  "events.amazonaws.com",
+        "SourceArn" :  { "Fn::GetAtt": ["StopScheduleEC2StopStartRule", "Arn"] }
+      }
+    }
+
+
+  },
+
+  "Outputs" :
+  {
+    "Region" : { "Description" :  "AWS Region", "Value" :   { "Ref" : "AWS::Region"} }
+  }
+}
